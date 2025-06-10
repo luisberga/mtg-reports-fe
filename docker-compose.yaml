@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mtg-reports-web:
+    build: .
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      - mtg-network
+
+networks:
+  mtg-network:
+    external: true
+    name: mtg-reports_default 

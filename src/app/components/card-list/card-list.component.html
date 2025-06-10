@@ -1,0 +1,136 @@
+<div class="card-list-container">
+  <div class="header">
+    <div class="header-left">
+      <h1>🃏 My Magic Collection</h1>
+      <div class="collection-info" *ngIf="!isLoading && totalItems > 0">
+        <span class="total-cards">{{ totalItems }} cards total</span>
+        <span class="total-value">Portfolio Value: ${{ getTotalValue() | number:'1.2-2' }}</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/dashboard" class="btn btn-secondary">
+        ← Back to Dashboard
+      </a>
+      <a routerLink="/cards/new" class="btn btn-primary">
+        ✨ Add Card
+      </a>
+    </div>
+  </div>
+
+  <!-- Items per page selector -->
+  <div class="controls" *ngIf="!isLoading && totalItems > 0">
+    <div class="items-per-page">
+      <label for="itemsPerPage">Cards per page:</label>
+      <select id="itemsPerPage" [value]="itemsPerPage" (change)="onItemsPerPageChange($event)">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="30">30</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading your precious cards...</p>
+  </div>
+
+  <div *ngIf="!isLoading && cards.length === 0" class="empty-state">
+    <div class="empty-icon">🎴</div>
+    <h3>No Cards in Your Collection</h3>
+    <p>Start building your legendary collection by adding some cards!</p>
+    <div class="empty-actions">
+      <a routerLink="/cards/new" class="btn btn-primary">Add Your First Card</a>
+      <a routerLink="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && cards.length > 0" class="cards-section">
+    <div class="cards-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Card Name</th>
+            <th>Set</th>
+            <th>Number</th>
+            <th>Condition</th>
+            <th>Current Price</th>
+            <th>Price Change</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let card of cards; trackBy: trackByCardId" class="card-row" [class.price-up]="card.price_change > 0" [class.price-down]="card.price_change < 0">
+            <td class="card-name">
+              <div class="card-name-container">
+                <span class="name">{{ card.name }}</span>
+                <small class="last-update">Updated {{ getRelativeTime(card.last_update) }}</small>
+              </div>
+            </td>
+            <td class="card-set">
+              <span class="set-badge">{{ card.set.toUpperCase() }}</span>
+            </td>
+            <td class="card-number">{{ card.collector_number }}</td>
+            <td class="card-foil">
+              <span *ngIf="card.foil" class="foil-badge">✨ Foil</span>
+              <span *ngIf="!card.foil" class="regular-badge">⚪ Regular</span>
+            </td>
+            <td class="card-price">
+              <div class="price-container">
+                <span class="current-price">${{ card.last_price.toFixed(2) }}</span>
+                <small class="old-price" *ngIf="card.old_price !== card.last_price">
+                  was ${{ card.old_price.toFixed(2) }}
+                </small>
+              </div>
+            </td>
+            <td class="price-change">
+              <span class="change-indicator" *ngIf="card.price_change !== 0">
+                <span *ngIf="card.price_change > 0" class="positive">
+                  📈 +${{ card.price_change.toFixed(2) }}
+                </span>
+                <span *ngIf="card.price_change < 0" class="negative">
+                  📉 ${{ card.price_change.toFixed(2) }}
+                </span>
+              </span>
+              <span *ngIf="card.price_change === 0" class="neutral">—</span>
+            </td>
+            <td class="card-actions">
+              <a [routerLink]="['/cards', card.id, 'edit']" class="btn btn-sm btn-primary" title="Edit card">
+                ✏️
+              </a>
+              <button (click)="deleteCard(card.id)" class="btn btn-sm btn-danger" [disabled]="isDeleting" title="Delete card">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination-container" *ngIf="totalPages > 1">
+      <div class="pagination-info">
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} cards
+      </div>
+      
+      <div class="pagination">
+        <button class="pagination-btn" (click)="prevPage()" [disabled]="currentPage === 1" title="Previous page">
+          ← Previous
+        </button>
+        
+        <button 
+          *ngFor="let page of getPageNumbers()" 
+          class="pagination-btn" 
+          [class.active]="page === currentPage"
+          (click)="goToPage(page)">
+          {{ page }}
+        </button>
+        
+        <button class="pagination-btn" (click)="nextPage()" [disabled]="currentPage === totalPages" title="Next page">
+          Next →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

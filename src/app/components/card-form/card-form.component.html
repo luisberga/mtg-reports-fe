@@ -1,0 +1,84 @@
+<div class="card-form-container">
+  <div class="form-header">
+    <h1>{{ isEditMode ? 'Edit Card' : 'Add New Card' }}</h1>
+    <p>{{ isEditMode ? 'Update card information' : 'Add a new card to your collection' }}</p>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+
+  <form *ngIf="!isLoading" (ngSubmit)="onSubmit()" class="card-form">
+    <div class="form-group">
+      <label for="name">Card Name *</label>
+      <input 
+        type="text" 
+        id="name" 
+        class="form-control"
+        [(ngModel)]="card.name" 
+        name="name"
+        required
+        placeholder="Enter card name"
+      >
+    </div>
+
+    <div *ngIf="!isEditMode" class="form-group">
+      <label for="set">Set *</label>
+      <input 
+        type="text" 
+        id="set" 
+        class="form-control"
+        [(ngModel)]="card.set" 
+        name="set"
+        required
+        placeholder="Enter set name"
+      >
+    </div>
+
+    <div *ngIf="!isEditMode" class="form-group">
+      <label for="collector_number">Collector Number *</label>
+      <input 
+        type="text" 
+        id="collector_number" 
+        class="form-control"
+        [(ngModel)]="card.collector_number" 
+        name="collector_number"
+        required
+        placeholder="Enter collector number"
+      >
+    </div>
+
+    <div *ngIf="!isEditMode" class="form-group">
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          [(ngModel)]="card.foil" 
+          name="foil"
+        >
+        Foil Card
+      </label>
+    </div>
+
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+
+    <div *ngIf="successMessage" class="success-message">
+      {{ successMessage }}
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+        Cancel
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="isSaving"
+      >
+        {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Card' : 'Add Card') }}
+      </button>
+    </div>
+  </form>
+</div> 

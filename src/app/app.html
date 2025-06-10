@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<div class="app-container">
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-header">
+      <h1 class="app-title">🃏 MTG Collection</h1>
+    </div>
+    
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+          📊 Dashboard
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a routerLink="/cards" routerLinkActive="active" class="nav-link">
+          🃏 My Cards
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a routerLink="/cards/new" routerLinkActive="active" class="nav-link">
+          ➕ Add Card
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a routerLink="/upload" routerLinkActive="active" class="nav-link">
+          📁 Upload File
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+</div>

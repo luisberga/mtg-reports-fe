@@ -1,0 +1,232 @@
+<div class="card-list-container">
+  <div class="header-section">
+    <h2>🃏 Minhas Cartas MTG</h2>
+    <p>Gerencie sua coleção de cartas Magic The Gathering</p>
+  </div>
+
+  <!-- Filtros e Busca -->
+  <div class="filters-section card">
+    <h3>🔍 Filtros de Busca</h3>
+    
+    <div class="filters-grid">
+      <div class="form-group">
+        <label for="searchName">Nome da Carta</label>
+        <input 
+          type="text" 
+          id="searchName"
+          [ngModel]="searchName()"
+          (ngModelChange)="searchName.set($event); onSearchChange()"
+          placeholder="Digite o nome da carta..."
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="searchSet">Conjunto (Set)</label>
+        <input 
+          type="text" 
+          id="searchSet"
+          [ngModel]="searchSet()"
+          (ngModelChange)="searchSet.set($event); onSearchChange()"
+          placeholder="Digite o nome do conjunto..."
+        />
+      </div>
+      
+      <div class="form-group">
+        <label for="searchCollectorNumber">Número do Colecionador</label>
+        <input 
+          type="text" 
+          id="searchCollectorNumber"
+          [ngModel]="searchCollectorNumber()"
+          (ngModelChange)="searchCollectorNumber.set($event); onSearchChange()"
+          placeholder="Digite o número..."
+        />
+      </div>
+    </div>
+    
+    <div class="actions">
+      <button 
+        class="btn btn-secondary"
+        (click)="loadCards()"
+        [disabled]="loading()"
+      >
+        🔄 Atualizar Lista
+      </button>
+      
+      <a routerLink="/cards/new" class="btn btn-primary">
+        ➕ Nova Carta
+      </a>
+    </div>
+  </div>
+
+  <!-- Estados de Loading e Error -->
+  @if (loading()) {
+    <div class="loading">
+      Carregando cartas...
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      {{ error() }}
+      <button class="btn btn-secondary" (click)="loadCards()">
+        Tentar Novamente
+      </button>
+    </div>
+  }
+
+  <!-- Lista de Cartas -->
+  @if (!loading() && !error()) {
+    <div class="results-section">
+      <div class="results-header">
+        <h3>📊 Resultados</h3>
+        <span class="count">
+          {{ filteredCards().length }} carta(s) encontrada(s)
+        </span>
+      </div>
+
+      @if (filteredCards().length === 0) {
+        <div class="empty-state card">
+          <h4>😅 Nenhuma carta encontrada</h4>
+          <p>Tente ajustar os filtros de busca ou adicione novas cartas à sua coleção.</p>
+          <a routerLink="/cards/new" class="btn btn-primary">
+            ➕ Adicionar Primeira Carta
+          </a>
+        </div>
+      } @else {
+        <!-- Tabela Responsiva -->
+        <div class="table-container">
+          <table class="cards-table">
+            <thead>
+              <tr>
+                <th>
+                  <button 
+                    class="sort-btn"
+                    (click)="onSortChange('name')"
+                    [class.active]="sortBy() === 'name'"
+                  >
+                    Nome
+                    @if (sortBy() === 'name') {
+                      <span class="sort-icon">
+                        {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                      </span>
+                    }
+                  </button>
+                </th>
+                <th>
+                  <button 
+                    class="sort-btn"
+                    (click)="onSortChange('set')"
+                    [class.active]="sortBy() === 'set'"
+                  >
+                    Conjunto
+                    @if (sortBy() === 'set') {
+                      <span class="sort-icon">
+                        {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                      </span>
+                    }
+                  </button>
+                </th>
+                <th>Número</th>
+                <th>Foil</th>
+                <th>
+                  <button 
+                    class="sort-btn"
+                    (click)="onSortChange('price')"
+                    [class.active]="sortBy() === 'price'"
+                  >
+                    Preço Atual
+                    @if (sortBy() === 'price') {
+                      <span class="sort-icon">
+                        {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                      </span>
+                    }
+                  </button>
+                </th>
+                <th>Variação</th>
+                <th>
+                  <button 
+                    class="sort-btn"
+                    (click)="onSortChange('date')"
+                    [class.active]="sortBy() === 'date'"
+                  >
+                    Última Atualização
+                    @if (sortBy() === 'date') {
+                      <span class="sort-icon">
+                        {{ sortDirection() === 'asc' ? '↑' : '↓' }}
+                      </span>
+                    }
+                  </button>
+                </th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (card of filteredCards(); track card.id) {
+                <tr class="card-row">
+                  <td class="card-name">
+                    <strong>{{ card.name }}</strong>
+                  </td>
+                  <td class="card-set">
+                    <span class="set-badge">{{ card.set.toUpperCase() }}</span>
+                  </td>
+                  <td class="card-number">{{ card.collector_number }}</td>
+                  <td class="card-foil">
+                    @if (card.foil) {
+                      <span class="foil-badge">✨ Foil</span>
+                    } @else {
+                      <span class="normal-badge">Normal</span>
+                    }
+                  </td>
+                  <td class="card-price">
+                    @if (card.last_price) {
+                      <strong>{{ formatCurrency(card.last_price) }}</strong>
+                    } @else {
+                      <span class="no-price">Sem preço</span>
+                    }
+                  </td>
+                  <td class="card-change">
+                    @if (card.price_change !== 0) {
+                      <span [class]="'price-change ' + getPriceChangeClass(card.price_change)">
+                        {{ getPriceChangeIcon(card.price_change) }}
+                        {{ formatCurrency(abs(card.price_change)) }}
+                      </span>
+                    } @else {
+                      <span class="no-change">-</span>
+                    }
+                  </td>
+                  <td class="card-date">
+                    {{ formatDate(card.last_update) }}
+                  </td>
+                  <td class="card-actions">
+                    <div class="action-buttons">
+                      <button 
+                        class="btn btn-sm btn-secondary"
+                        [routerLink]="['/cards', card.id]"
+                        title="Ver detalhes"
+                      >
+                        👁️
+                      </button>
+                      <button 
+                        class="btn btn-sm btn-primary"
+                        [routerLink]="['/cards', card.id, 'edit']"
+                        title="Editar"
+                      >
+                        ✏️
+                      </button>
+                      <button 
+                        class="btn btn-sm btn-danger"
+                        (click)="deleteCard(card.id)"
+                        title="Excluir"
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }

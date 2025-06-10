@@ -1,0 +1,65 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>Collection Dashboard</h1>
+    <p>Manage your MTG card collection</p>
+  </div>
+
+  <div class="stats-grid" *ngIf="!isLoading">
+    <div class="stat-card">
+      <div class="stat-icon">🃏</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ totalCards }}</div>
+        <div class="stat-label">Total Cards</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">✨</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ foilCards }}</div>
+        <div class="stat-label">Foil Cards</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">📦</div>
+      <div class="stat-content">
+        <div class="stat-value">{{ uniqueSets }}</div>
+        <div class="stat-label">Different Sets</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-content">
+        <div class="stat-value">${{ totalValue.toFixed(2) }}</div>
+        <div class="stat-label">Total Value</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h2>Quick Actions</h2>
+    <div class="action-grid">
+      <a routerLink="/cards/new" class="action-btn">
+        <div class="action-icon">➕</div>
+        <span>Add New Card</span>
+      </a>
+      
+      <a routerLink="/cards" class="action-btn">
+        <div class="action-icon">📚</div>
+        <span>View All Cards</span>
+      </a>
+      
+      <a routerLink="/upload" class="action-btn">
+        <div class="action-icon">📁</div>
+        <span>Upload File</span>
+      </a>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Loading...</p>
+  </div>
+</div> 

@@ -1,0 +1,146 @@
+<div class="upload-container">
+  <div class="upload-header">
+    <h1>☁️ Upload em Lote</h1>
+    <p>Adicione múltiplas cartas à sua coleção através de um arquivo CSV</p>
+  </div>
+
+  <!-- Instructions -->
+  <div class="upload-instructions">
+    <h3>📋 Como usar:</h3>
+    <ol>
+      <li>Prepare um arquivo CSV com as colunas: <strong>name, set_name, collector_number, foil</strong></li>
+      <li>Separe os valores por vírgula</li>
+      <li>Use <code>true</code> ou <code>false</code> para a coluna foil</li>
+      <li>Selecione o arquivo e clique em "Upload"</li>
+    </ol>
+
+    <div class="csv-example">
+      <h4>Exemplo de CSV:</h4>
+      <pre>name,set_name,collector_number,foil
+Sauron the Dark Lord,LTR,001,false
+Gandalf the Grey,LTR,002,true
+Nazgûl,LTR,003,false</pre>
+    </div>
+  </div>
+
+  <!-- File Upload Area -->
+  <div class="upload-area" 
+       [class.dragover]="isDragOver"
+       (dragover)="onDragOver($event)"
+       (dragleave)="onDragLeave($event)"
+       (drop)="onDrop($event)">
+    
+    <div *ngIf="!selectedFile" class="upload-placeholder">
+      <div class="upload-icon">📁</div>
+      <h3>Selecione ou arraste seu arquivo CSV</h3>
+      <p>Tamanho máximo: 10MB</p>
+      
+      <input 
+        type="file" 
+        #fileInput 
+        accept=".csv" 
+        (change)="onFileSelected($event)"
+        hidden
+      >
+      
+      <button class="btn btn-primary" (click)="fileInput.click()">
+        📂 Selecionar Arquivo
+      </button>
+    </div>
+
+    <div *ngIf="selectedFile && !isUploading" class="file-selected">
+      <div class="file-info">
+        <div class="file-icon">📄</div>
+        <div class="file-details">
+          <h4>{{ selectedFile.name }}</h4>
+          <p>{{ getFileSize(selectedFile.size) }}</p>
+        </div>
+        <button class="btn btn-outline btn-sm" (click)="removeFile()">
+          ❌ Remover
+        </button>
+      </div>
+      
+      <div class="upload-actions">
+        <button class="btn btn-accent" (click)="uploadFile()" [disabled]="isUploading">
+          ☁️ Fazer Upload
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Progress -->
+  <div *ngIf="isUploading" class="upload-progress">
+    <div class="progress-header">
+      <h3>📤 Fazendo Upload...</h3>
+      <span class="progress-percentage">{{ uploadProgress }}%</span>
+    </div>
+    
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="uploadProgress"></div>
+    </div>
+    
+    <div class="progress-status">
+      <p>{{ uploadStatus }}</p>
+    </div>
+  </div>
+
+  <!-- Upload Results -->
+  <div *ngIf="uploadResults" class="upload-results">
+    <div class="results-header">
+      <h3>📊 Resultados do Upload</h3>
+    </div>
+    
+    <div class="results-stats">
+      <div class="result-stat success">
+        <div class="stat-value">{{ uploadResults.processed }}</div>
+        <div class="stat-label">Cartas Processadas</div>
+      </div>
+      
+      <div class="result-stat error" *ngIf="uploadResults.not_processed > 0">
+        <div class="stat-value">{{ uploadResults.not_processed }}</div>
+        <div class="stat-label">Cartas Rejeitadas</div>
+      </div>
+    </div>
+
+    <div *ngIf="uploadResults.processed > 0" class="success-message">
+      ✅ Upload concluído com sucesso! {{ uploadResults.processed }} cartas foram adicionadas à sua coleção.
+    </div>
+
+    <div *ngIf="uploadResults.not_processed > 0" class="warning-message">
+      ⚠️ {{ uploadResults.not_processed }} cartas não puderam ser processadas. Verifique o formato do CSV e tente novamente.
+    </div>
+
+    <div class="results-actions">
+      <button class="btn btn-primary" (click)="viewCollection()">
+        📋 Ver Coleção
+      </button>
+      <button class="btn btn-outline" (click)="resetUpload()">
+        🔄 Novo Upload
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <strong>Erro:</strong> {{ errorMessage }}
+    <button class="btn btn-sm btn-outline" (click)="clearError()">
+      ❌ Fechar
+    </button>
+  </div>
+
+  <!-- CSV Template Download -->
+  <div class="template-section">
+    <h3>📥 Template CSV</h3>
+    <p>Baixe um template para facilitar a criação do seu arquivo:</p>
+    <button class="btn btn-outline" (click)="downloadTemplate()">
+      📥 Baixar Template CSV
+    </button>
+  </div>
+
+  <!-- Back Button -->
+  <div class="back-section">
+    <button class="btn btn-outline" (click)="goBack()">
+      ⬅️ Voltar para Coleção
+    </button>
+  </div>
+</div> 
