@@ -1,44 +1,46 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CardService } from '../../services/card.service';
-import { Card, PaginatedCardsResponse, ResponseCollectionStats } from '../../models/card.model';
+import { Card, ResponsePaginatedCards } from '../../models/card.model';
 
 @Component({
-  selector: 'app-card-list',
+  selector: 'app-card-history',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './card-list.component.html',
-  styleUrls: ['./card-list.component.scss']
+  templateUrl: './card-history.component.html',
+  styleUrls: ['./card-history.component.scss']
 })
-export class CardListComponent implements OnInit {
-  cards: Card[] = [];
+export class CardHistoryComponent implements OnInit {
+  cardId: string = '';
+  historyCards: Card[] = [];
   isLoading = true;
-  isDeleting = false;
   
   // Pagination properties
   currentPage = 1;
-  itemsPerPage = 30;
+  itemsPerPage = 10;
   totalItems = 0;
   totalPages = 0;
 
-  // Collection stats
-  totalValue = 0;
-
-  constructor(private cardService: CardService) {}
+  constructor(
+    private cardService: CardService,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
-    this.loadCards();
-    this.loadCollectionStats();
+    this.route.params.subscribe(params => {
+      this.cardId = params['id'];
+      this.loadCardHistory();
+    });
   }
 
-  private loadCards(page: number = 1): void {
+  private loadCardHistory(page: number = 1): void {
     this.isLoading = true;
     this.currentPage = page;
     
-    this.cardService.getCards(page, this.itemsPerPage).subscribe({
-      next: (response: PaginatedCardsResponse) => {
-        this.cards = response.cards;
+    this.cardService.getCardHistory(this.cardId, page, this.itemsPerPage).subscribe({
+      next: (response: ResponsePaginatedCards) => {
+        this.historyCards = response.cards;
         this.currentPage = response.page;
         this.itemsPerPage = response.limit;
         this.totalItems = response.total;
@@ -46,61 +48,28 @@ export class CardListComponent implements OnInit {
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading cards:', error);
+        console.error('Error loading card history:', error);
         this.isLoading = false;
       }
     });
   }
 
-  private loadCollectionStats(): void {
-    this.cardService.getCollectionStats().subscribe({
-      next: (stats: ResponseCollectionStats) => {
-        this.totalValue = stats.total_value;
-      },
-      error: (error) => {
-        console.error('Error loading collection stats:', error);
-      }
-    });
-  }
-
-  deleteCard(cardId: number): void {
-    if (this.isDeleting) return;
-    
-    if (confirm('Are you sure you want to delete this card?')) {
-      this.isDeleting = true;
-      
-      this.cardService.deleteCard(cardId).subscribe({
-        next: () => {
-          // Reload the current page after deletion
-          this.loadCards(this.currentPage);
-          this.loadCollectionStats(); // Refresh stats after deletion
-          this.isDeleting = false;
-        },
-        error: (error) => {
-          console.error('Error deleting card:', error);
-          alert('Error deleting card. Please try again.');
-          this.isDeleting = false;
-        }
-      });
-    }
-  }
-
   // Pagination methods
   goToPage(page: number): void {
     if (page >= 1 && page <= this.totalPages && page !== this.currentPage) {
-      this.loadCards(page);
+      this.loadCardHistory(page);
     }
   }
 
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
-      this.loadCards(this.currentPage + 1);
+      this.loadCardHistory(this.currentPage + 1);
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
-      this.loadCards(this.currentPage - 1);
+      this.loadCardHistory(this.currentPage - 1);
     }
   }
 
@@ -124,17 +93,12 @@ export class CardListComponent implements OnInit {
 
   changeItemsPerPage(newLimit: number): void {
     this.itemsPerPage = newLimit;
-    this.loadCards(1); // Reset to first page when changing items per page
+    this.loadCardHistory(1); // Reset to first page when changing items per page
   }
 
   onItemsPerPageChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     this.changeItemsPerPage(+target.value);
-  }
-
-  // Helper methods for template
-  getTotalValue(): number {
-    return this.totalValue;
   }
 
   trackByCardId(index: number, card: Card): number {

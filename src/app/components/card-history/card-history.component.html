@@ -1,18 +1,12 @@
-<div class="card-list-container">
+<div class="card-history-container">
   <div class="header">
     <div class="header-left">
-      <h1>🃏 My Magic Collection</h1>
-      <div class="collection-info" *ngIf="!isLoading && totalItems > 0">
-        <span class="total-cards">{{ totalItems }} cards total</span>
-        <span class="total-value">Portfolio Value: ${{ getTotalValue() | number:'1.2-2' }}</span>
-      </div>
+      <h1>📈 Card Price History</h1>
+      <p class="subtitle">Track price changes over time</p>
     </div>
     <div class="header-actions">
-      <a routerLink="/dashboard" class="btn btn-secondary">
-        ← Back to Dashboard
-      </a>
-      <a routerLink="/cards/new" class="btn btn-primary">
-        ✨ Add Card
+      <a routerLink="/cards" class="btn btn-secondary">
+        ← Back to Cards
       </a>
     </div>
   </div>
@@ -20,58 +14,74 @@
   <!-- Items per page selector -->
   <div class="controls" *ngIf="!isLoading && totalItems > 0">
     <div class="items-per-page">
-      <label for="itemsPerPage">Cards per page:</label>
+      <label for="itemsPerPage">Records per page:</label>
       <select id="itemsPerPage" [value]="itemsPerPage" (change)="onItemsPerPageChange($event)">
         <option value="10">10</option>
         <option value="20">20</option>
         <option value="30">30</option>
         <option value="50">50</option>
-        <option value="100">100</option>
       </select>
     </div>
   </div>
 
   <div *ngIf="isLoading" class="loading">
     <div class="spinner"></div>
-    <p>Loading your precious cards...</p>
+    <p>Loading price history...</p>
   </div>
 
-  <div *ngIf="!isLoading && cards.length === 0" class="empty-state">
-    <div class="empty-icon">🎴</div>
-    <h3>No Cards in Your Collection</h3>
-    <p>Start building your legendary collection by adding some cards!</p>
+  <div *ngIf="!isLoading && historyCards.length === 0" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h3>No Price History Available</h3>
+    <p>No historical price data found for this card.</p>
     <div class="empty-actions">
-      <a routerLink="/cards/new" class="btn btn-primary">Add Your First Card</a>
-      <a routerLink="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+      <a routerLink="/cards" class="btn btn-primary">Back to Cards</a>
     </div>
   </div>
 
-  <div *ngIf="!isLoading && cards.length > 0" class="cards-section">
-    <div class="cards-table">
+  <div *ngIf="!isLoading && historyCards.length > 0" class="history-section">
+    <div class="history-stats" *ngIf="historyCards.length > 0">
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalItems }}</div>
+          <div class="stat-label">Price Records</div>
+        </div>
+      </div>
+      
+      <div class="stat-card" *ngIf="historyCards[0]">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <div class="stat-value">${{ historyCards[0].last_price.toFixed(2) }}</div>
+          <div class="stat-label">Current Price</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-table">
       <table>
         <thead>
           <tr>
             <th>Card Name</th>
             <th>Set</th>
-            <th>Number</th>
-            <th>Condition</th>
-            <th>Current Price</th>
-            <th>Price Change</th>
-            <th>Actions</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Change</th>
+            <th>Last Updated</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let card of cards; trackBy: trackByCardId" class="card-row" [class.price-up]="card.price_change > 0" [class.price-down]="card.price_change < 0">
+          <tr *ngFor="let card of historyCards; trackBy: trackByCardId" class="history-row" 
+              [class.price-up]="card.price_change > 0" 
+              [class.price-down]="card.price_change < 0">
             <td class="card-name">
               <div class="card-name-container">
                 <span class="name">{{ card.name }}</span>
-                <small class="last-update">Updated {{ getRelativeTime(card.last_update) }}</small>
+                <small class="collector-number">#{{ card.collector_number }}</small>
               </div>
             </td>
             <td class="card-set">
               <span class="set-badge">{{ card.set.toUpperCase() }}</span>
             </td>
-            <td class="card-number">{{ card.collector_number }}</td>
             <td class="card-foil">
               <span *ngIf="card.foil" class="foil-badge">✨ Foil</span>
               <span *ngIf="!card.foil" class="regular-badge">⚪ Regular</span>
@@ -95,16 +105,8 @@
               </span>
               <span *ngIf="card.price_change === 0" class="neutral">—</span>
             </td>
-            <td class="card-actions">
-              <a [routerLink]="['/cards', card.id, 'history']" class="btn btn-sm btn-secondary" title="View price history">
-                📈
-              </a>
-              <a [routerLink]="['/cards', card.id, 'edit']" class="btn btn-sm btn-primary" title="Edit card">
-                ✏️
-              </a>
-              <button (click)="deleteCard(card.id)" class="btn btn-sm btn-danger" [disabled]="isDeleting" title="Delete card">
-                🗑️
-              </button>
+            <td class="last-update">
+              {{ getRelativeTime(card.last_update) }}
             </td>
           </tr>
         </tbody>
@@ -114,7 +116,7 @@
     <!-- Pagination -->
     <div class="pagination-container" *ngIf="totalPages > 1">
       <div class="pagination-info">
-        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} cards
+        Showing {{ (currentPage - 1) * itemsPerPage + 1 }} - {{ Math.min(currentPage * itemsPerPage, totalItems) }} of {{ totalItems }} records
       </div>
       
       <div class="pagination">
@@ -136,4 +138,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> 

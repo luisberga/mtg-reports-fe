@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CardService } from '../../services/card.service';
-import { Card, PaginatedCardsResponse } from '../../models/card.model';
+import { ResponseCollectionStats } from '../../models/card.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,27 +25,18 @@ export class DashboardComponent implements OnInit {
   }
 
   private loadDashboardData(): void {
-    // Load first page to get statistics - we'll need to load all cards for accurate stats
-    // For now, let's use a large limit to get most cards in one request
-    this.cardService.getCards(1, 100).subscribe({
-      next: (response: PaginatedCardsResponse) => {
-        this.calculateStats(response.cards);
-        // Update total cards from API response
-        this.totalCards = response.total;
+    this.cardService.getCollectionStats().subscribe({
+      next: (stats: ResponseCollectionStats) => {
+        this.totalCards = stats.total_cards;
+        this.foilCards = stats.foil_cards;
+        this.uniqueSets = stats.unique_sets;
+        this.totalValue = stats.total_value;
         this.isLoading = false;
       },
       error: (error) => {
-        console.error('Error loading cards:', error);
+        console.error('Error loading collection stats:', error);
         this.isLoading = false;
       }
     });
-  }
-
-  private calculateStats(cards: Card[]): void {
-    // Note: These stats are based on the sample loaded, not all cards
-    // For accurate stats, we'd need to load all cards or get stats from backend
-    this.foilCards = cards.filter(card => card.foil).length;
-    this.uniqueSets = [...new Set(cards.map(card => card.set))].length;
-    this.totalValue = cards.reduce((sum, card) => sum + (card.last_price || 0), 0);
   }
 } 
