@@ -23,6 +23,11 @@ export const routes: Routes = [
       .then(m => m.CardFormComponent) 
   },
   { 
+    path: 'cards/:id/history', 
+    loadComponent: () => import('./components/card-history/card-history.component')
+      .then(m => m.CardHistoryComponent) 
+  },
+  { 
     path: 'upload', 
     loadComponent: () => import('./components/file-upload/file-upload.component')
       .then(m => m.FileUploadComponent) 

@@ -1,36 +1,53 @@
-<!DOCTYPE html>
 <div class="app-container">
-  <!-- Sidebar -->
-  <nav class="sidebar">
-    <div class="sidebar-header">
+  <!-- Top Navigation -->
+  <nav class="top-nav">
+    <div class="nav-brand">
       <h1 class="app-title">🃏 MTG Collection</h1>
     </div>
     
-    <ul class="nav-menu">
-      <li class="nav-item">
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
-          📊 Dashboard
-        </a>
-      </li>
+    <div class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        📊 Dashboard
+      </a>
       
-      <li class="nav-item">
-        <a routerLink="/cards" routerLinkActive="active" class="nav-link">
-          🃏 My Cards
-        </a>
-      </li>
+      <a routerLink="/cards" routerLinkActive="active" class="nav-link">
+        🃏 My Cards
+      </a>
       
-      <li class="nav-item">
-        <a routerLink="/cards/new" routerLinkActive="active" class="nav-link">
-          ➕ Add Card
-        </a>
-      </li>
+      <a routerLink="/cards/new" routerLinkActive="active" class="nav-link">
+        ➕ Add Card
+      </a>
       
-      <li class="nav-item">
-        <a routerLink="/upload" routerLinkActive="active" class="nav-link">
-          📁 Upload File
-        </a>
-      </li>
-    </ul>
+      <a routerLink="/upload" routerLinkActive="active" class="nav-link">
+        📁 Upload File
+      </a>
+    </div>
+
+    <!-- Mobile menu button -->
+    <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+      <span class="hamburger"></span>
+      <span class="hamburger"></span>
+      <span class="hamburger"></span>
+    </button>
+  </nav>
+
+  <!-- Mobile Navigation -->
+  <nav class="mobile-nav" [class.active]="isMobileMenuOpen">
+    <a routerLink="/dashboard" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
+      📊 Dashboard
+    </a>
+    
+    <a routerLink="/cards" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
+      🃏 My Cards
+    </a>
+    
+    <a routerLink="/cards/new" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
+      ➕ Add Card
+    </a>
+    
+    <a routerLink="/upload" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">
+      📁 Upload File
+    </a>
   </nav>
 
   <!-- Main Content -->

@@ -79,4 +79,19 @@ export interface PaginatedCardsResponse {
   limit: number;
   total: number;
   total_pages: number;
+}
+
+export interface ResponseCollectionStats {
+  total_cards: number;
+  foil_cards: number;
+  unique_sets: number;
+  total_value: number;
+}
+
+export interface ResponsePaginatedCards {
+  cards: Card[];
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
 } 
